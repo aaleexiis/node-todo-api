@@ -66,3 +66,7 @@ describe('GET /todos', () => {
             }).end(done);
     });
 });
+
+/*const users = [{email: 'a@a.com'}, {email:'b@b.com'}, {email:'c@c.com'}];
+
+User.insertMany(users);*/
