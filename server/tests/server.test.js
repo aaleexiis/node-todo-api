@@ -1,10 +1,17 @@
 const expect = require('expect');
 const request = require('supertest');
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
-const todos = [ { text: 'Test todo text'}, {text: '2 test todo'}];
+const todos = [ {
+        _id: new ObjectID(),
+        text: 'Test todo text'
+    }, {
+        _id: new ObjectID(),
+        text: '2 test todo'
+    }];
 
 beforeEach((done) => {
    Todo.remove({}).then(() => {
@@ -66,6 +73,34 @@ describe('GET /todos', () => {
             }).end(done);
     });
 });
+
+describe('GET /todos/:id', () => {
+    it('should return todo doc', (done) => {
+        request(app)
+            .get(`/todos/${todos[0]._id.toHexString()}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.text).toBe(todos[0].text);
+            }).end(done);
+    });
+
+    it('should return 400 if todo not found', (done) => {
+        const randomID = new ObjectID().toHexString();
+        request(app)
+            .get(`/todos/${randomID}`)
+            .expect(400)
+            .end(done);
+    });
+
+
+    it('should return 404 if object id is not valid', (done) => {
+        request(app)
+            .get('/todos/123')
+            .expect(404)
+            .end(done);
+    });
+});
+
 
 /*const users = [{email: 'a@a.com'}, {email:'b@b.com'}, {email:'c@c.com'}];
 
