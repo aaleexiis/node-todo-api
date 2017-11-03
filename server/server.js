@@ -98,13 +98,12 @@ app.post('/users', (req, res) => {
 
     const user = new User(body);
     user.save().then(() => {
-        user.generateAuthToken();
+        return user.generateAuthToken();
     }).then((token) => {
-        console.log(JSON.stringify(token,undefined,2));
         res.header('x-auth', token).send(user);
-    }).catch((err) => {
-        res.status(400).send(err);
-    });
+    }).catch((e) => {
+        res.status(400).send(e);
+    })
 });
 
 app.listen(port, () => {
