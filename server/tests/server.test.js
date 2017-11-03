@@ -4,6 +4,7 @@ const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
+const {User} = require('./../models/user')
 
 const todos = [ {
         _id: new ObjectID(),
@@ -63,7 +64,6 @@ describe('POST /todos', () => {
             })
     });
 });
-
 
 describe('GET /todos', () => {
     it('should get all todos', (done) => {
@@ -175,6 +175,57 @@ describe('PATCH /todos/:id', () => {
             }).end(done);
     });
 });
-/*const users = [{email: 'a@a.com'}, {email:'b@b.com'}, {email:'c@c.com'}];
 
-User.insertMany(users);*/
+describe('POST /users', () => {
+    it('should create a new user', (done) => {
+        const user = {
+            email: 'pero@riba.com',
+            password: 'peroriba'
+        };
+
+        request(app)
+            .post('/users')
+            .send(user)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.email).toBe(user.email);
+                expect(res.body.password).toBe(user.password);
+            })
+            .end((err, resp) => {
+                if (err){
+                    return done(err);
+                }
+
+                User.find(user).then((users) => {
+                    expect(users.length).toBe(1);
+                    expect(users[0].email).toBe(user.email);
+                    done();
+                }).catch((e) => done(e));
+            });
+    });
+
+    it('should not create user if password is missing', (done) => {
+        const user = {
+            email: 'pero1@riba.com'
+        };
+
+        request(app)
+            .post('/users')
+            .send(user)
+            .expect(400)
+            .end(done);
+    });
+
+    it('should not create user if email is missing', (done) => {
+        const user = {
+            password: 'peroriba1'
+        };
+
+        request(app)
+            .post('/users')
+            .send(user)
+            .expect(400)
+            .end(done);
+    });
+
+});

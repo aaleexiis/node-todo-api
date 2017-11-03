@@ -13,6 +13,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
+
 app.post('/todos', (req, res) => {
     const text = req.body.text;
     const todo = new Todo({text});
@@ -65,7 +66,7 @@ app.delete('/todos/:id', (req, res) => {
 
 app.patch('/todos/:id', (req, res) => {
     const id = req.params.id;
-    let body = _.pick(req.body, ['text', 'completed']);
+    const body = _.pick(req.body, ['text', 'completed']);
 
     if(!ObjectID.isValid(id)){
         return res.status(404).send();
@@ -85,6 +86,24 @@ app.patch('/todos/:id', (req, res) => {
         res.send({todo});
     }).catch((e) => {
         return res.status(404).send();
+    });
+});
+
+app.post('/users', (req, res) => {
+    const body = _.pick(req.body, ['email', 'password'])
+
+    if(!(body.email && body.password)){
+        return res.status(400).send('Email or password is not defined.');
+    }
+
+    const user = new User(body);
+    user.save().then(() => {
+        user.generateAuthToken();
+    }).then((token) => {
+        console.log(JSON.stringify(token,undefined,2));
+        res.header('x-auth', token).send(user);
+    }).catch((err) => {
+        res.status(400).send(err);
     });
 });
 
